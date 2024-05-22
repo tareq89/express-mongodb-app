@@ -50,8 +50,13 @@ db.once("open", async function () {
 // List all persons
 app.get("/persons", async (req, res) => {
   try {
-    console.log(req.query);
-    const persons = await Person.find();
+    const query = {};
+    Object.keys(req.query).forEach((key) => {
+      if (req.query[key]) {
+        query[key] = { $regex: req.query[key], $options: "i" };
+      }
+    });
+    const persons = await Person.find(query);
     res.json(persons);
   } catch (error) {
     res.status(500).send(error);
