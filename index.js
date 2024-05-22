@@ -14,6 +14,14 @@ mongoose.connect(process.env.MONGODB_URI, {
 });
 
 const db = mongoose.connection;
+// Person Schema and Model
+const personSchema = new mongoose.Schema({
+  name: String,
+  age: Number,
+  email: String,
+});
+
+const Person = mongoose.model("Person", personSchema, "person");
 
 // Check if the connection is successful
 db.on("error", console.error.bind(console, "connection error:"));
@@ -22,7 +30,9 @@ db.once("open", async function () {
 
   // Check if the 'persons' collection exists, if not create it with mock data
   const collections = await mongoose.connection.db.listCollections().toArray();
-  const personCollection = collections.find((c) => c.name === "persons");
+  console.log(collections);
+  const personCollection = collections.find((c) => c.name === "person");
+  console.log(personCollection);
 
   if (!personCollection) {
     const Person = mongoose.model("Person", personSchema);
@@ -33,16 +43,13 @@ db.once("open", async function () {
     ]);
     console.log("Mock data inserted into persons collection");
   }
+  const Person = mongoose.model("Person", personSchema);
+  await Person.insertMany([
+    { name: "John Doe", age: 30, email: "john.doe@example.com" },
+    { name: "Jane Smith", age: 25, email: "jane.smith@example.com" },
+    { name: "Bob Johnson", age: 40, email: "bob.johnson@example.com" },
+  ]);
 });
-
-// Person Schema and Model
-const personSchema = new mongoose.Schema({
-  name: String,
-  age: Number,
-  email: String,
-});
-
-const Person = mongoose.model("Person", personSchema);
 
 // Routes
 // List all persons

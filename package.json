@@ -2,10 +2,10 @@
   "name": "express-mongodb-app",
   "version": "1.0.0",
   "description": "An Express.js application with MongoDB",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node server.js",
-    "vercel-start": "node server.js"
+    "start": "node index.js",
+    "vercel-start": "node index.js"
   },
   "engines": {
     "node": ">=14.0.0"
