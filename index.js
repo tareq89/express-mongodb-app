@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
+const mockData = require("./mockData");
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -8,17 +9,23 @@ const port = process.env.PORT || 3000;
 app.use(bodyParser.json());
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose.connect(
+  process.env.MONGODB_URI ||
+    "mongodb+srv://tareqazizaustcse:VPxG9j49XWie3qnP@cluster0.qbn1fpg.mongodb.net/testMongo?retryWrites=true&w=majority&appName=Cluster0",
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  }
+);
 
 const db = mongoose.connection;
 // Person Schema and Model
 const personSchema = new mongoose.Schema({
-  name: String,
-  age: Number,
-  email: String,
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  dateOfBirth: Date,
+  address: String,
 });
 
 const Person = mongoose.model("Person", personSchema, "person");
@@ -30,31 +37,20 @@ db.once("open", async function () {
 
   // Check if the 'persons' collection exists, if not create it with mock data
   const collections = await mongoose.connection.db.listCollections().toArray();
-  console.log(collections);
   const personCollection = collections.find((c) => c.name === "person");
-  console.log(personCollection);
 
   if (!personCollection) {
     const Person = mongoose.model("Person", personSchema);
-    await Person.insertMany([
-      { name: "John Doe", age: 30, email: "john.doe@example.com" },
-      { name: "Jane Smith", age: 25, email: "jane.smith@example.com" },
-      { name: "Bob Johnson", age: 40, email: "bob.johnson@example.com" },
-    ]);
+    await Person.insertMany(mockData);
     console.log("Mock data inserted into persons collection");
   }
-  const Person = mongoose.model("Person", personSchema);
-  await Person.insertMany([
-    { name: "John Doe", age: 30, email: "john.doe@example.com" },
-    { name: "Jane Smith", age: 25, email: "jane.smith@example.com" },
-    { name: "Bob Johnson", age: 40, email: "bob.johnson@example.com" },
-  ]);
 });
 
 // Routes
 // List all persons
 app.get("/persons", async (req, res) => {
   try {
+    console.log(req.query);
     const persons = await Person.find();
     res.json(persons);
   } catch (error) {
